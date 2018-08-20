@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MBCircularProgressBar
 
 class QuizzViewController: UIViewController {
     
@@ -16,16 +17,21 @@ class QuizzViewController: UIViewController {
     var qcm = [[String]]()
 
     let numQuestions = 3
-    var currentQuizzIndex = 0
-    var score = 0
+    var currentQuizzIndex = -1
+    var score = -1
     
+    @IBOutlet weak var popTitle: UIVisualEffectView!
+    @IBOutlet weak var labelTitre: UILabel!
     @IBOutlet weak var labelScore: UILabel!
+    @IBOutlet weak var labelQuestion: UILabel!
     @IBOutlet weak var imageFlag: UIImageView!
     
     @IBOutlet weak var button1: MyButton!
     @IBOutlet weak var button2: MyButton!
     @IBOutlet weak var button3: MyButton!
     @IBOutlet weak var button4: MyButton!
+    
+    @IBOutlet weak var viewTimer: MBCircularProgressBarView!
     
     //popup
     @IBOutlet weak var popScreen: UIVisualEffectView!
@@ -44,15 +50,55 @@ class QuizzViewController: UIViewController {
         navigationItem.title = titleQuizz
         generateQuizz()
         
-        runQuizz()
+        start()
+    }
+    
+    private func start() {
+        initTimer()
+        hideTimer()
+        
+        button1.isHidden = true
+        button2.isHidden = true
+        button3.isHidden = true
+        button4.isHidden = true
+        
+        displayTop()
+        
+        imageFlag.image = #imageLiteral(resourceName: "logo")
+        popButtonNext.setTitle("Démarrer", for: .normal)
+        popButtonNext.isHidden = false
+    }
+    
+    private func startTimer() {
+        viewTimer.isHidden = false
+        viewTimer.value = 0
+        UIView.animate(withDuration: 10.0) {
+            self.viewTimer.value = 60
+        }
+    }
+    
+    private func hideTimer() {
+        viewTimer.isHidden = true
     }
 
+    private func initTimer() {
+        
+    }
+    
     private func runQuizz() {
+        
+        button1.isHidden = false
+        button2.isHidden = false
+        button3.isHidden = false
+        button4.isHidden = false
+        
+        startTimer()
+        score = 0
         
         popScreen.isHidden = true
         popButtonNext.setTitle((currentQuizzIndex+1) >= numQuestions ? "Terminer" : "Continuer", for: .normal)
         popButtonNext.isHidden = true
-        displayScore()
+        displayTop()
         
         let currentQcm = qcm[currentQuizzIndex]
         let currenrQuizz = quizz[currentQuizzIndex]
@@ -95,11 +141,10 @@ class QuizzViewController: UIViewController {
             let indexPaysATrouver = Int().getRandom(max: datasContinentTemp.count)
             //et on l'ajoute au tableau du quizz
             quizz.append(datasContinentTemp[indexPaysATrouver]);
-            
-            print(pays2Qcm)
+
             // on retire du panier des pays pour le qcm le pays à trouver
             pays2Qcm.remove(at: indexPaysATrouver)
-            print(pays2Qcm)
+
             // et on ajoute dans le tableau temporaire du qcm, la bonne réponse
             qcmTemp[qcmShuffled[0]] = datasContinentTemp[indexPaysATrouver].first!
             
@@ -108,8 +153,6 @@ class QuizzViewController: UIViewController {
                 let rand = Int().getRandom(max: pays2Qcm.count)
                 qcmTemp[qcmShuffled[index]] = pays2Qcm[rand].first!
                 pays2Qcm.remove(at: rand)
-                print(pays2Qcm)
-                print("ok")
             }
             qcm.append(qcmTemp)
             datasContinentTemp.remove(at: indexPaysATrouver)
@@ -117,7 +160,6 @@ class QuizzViewController: UIViewController {
     }
     
     @IBAction func buttonQcmHandle(_ sender: MyButton) {
-        
         
         score += sender.tag
         let country = quizz[currentQuizzIndex]
@@ -130,7 +172,7 @@ class QuizzViewController: UIViewController {
         popScreen.isHidden = false
         popButtonNext.isHidden = false
         
-        displayScore()
+        displayTop()
         
     }
     
@@ -147,8 +189,20 @@ class QuizzViewController: UIViewController {
         
     }
     
-    private func displayScore() {
-        labelScore.text = "Score (\(score)) Question (\(currentQuizzIndex+1) / \(numQuestions))"
+    private func displayTop() {
+        if score == -1 {
+            popTitle.isHidden = false
+            labelTitre.isHidden = false
+            labelTitre.text = "Quizz \(titleQuizz)"
+            labelScore.text = ""
+            labelQuestion.text = ""
+        }
+        else {
+            popTitle.isHidden = true
+            labelTitre.isHidden = true
+            labelScore.text = "Score : \(score)"
+            labelQuestion.text = "\(currentQuizzIndex+1) / \(numQuestions)"
+        }
     }
     
     private func getShuffledQCM() -> [Int] {
