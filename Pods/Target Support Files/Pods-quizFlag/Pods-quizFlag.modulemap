@@ -1,0 +1,6 @@
+framework module Pods_quizFlag {
+  umbrella header "Pods-quizFlag-umbrella.h"
+
+  export *
+  module * { export * }
+}
